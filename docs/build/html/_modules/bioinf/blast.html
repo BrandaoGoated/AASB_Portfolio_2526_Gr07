@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html lang="pt" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bioinf.blast &#8212; Documentação AASB 1.0</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=bbb231ee"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=beaedd51"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Pesquisar" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fonte de bioinf.blast</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="c1"># blast.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="c1"># ---------- Helpers de extensão/score (baixa complexidade) ----------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_score_seed</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">i_query</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">match</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pontua o k-mer seed.&quot;&quot;&quot;</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="n">match</span> <span class="k">if</span> <span class="n">query</span><span class="p">[</span><span class="n">i_query</span> <span class="o">+</span> <span class="n">t</span><span class="p">]</span> <span class="o">==</span> <span class="n">seq</span><span class="p">[</span><span class="n">i_seq</span> <span class="o">+</span> <span class="n">t</span><span class="p">]</span> <span class="k">else</span> <span class="n">mismatch</span>
+    <span class="k">return</span> <span class="n">score</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extend_left</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">i_query</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">match</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extensão à esquerda: devolve (delta_score, extensão_em_caracteres).&quot;&quot;&quot;</span>
+    <span class="n">limite</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">i_query</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># percorre o número máximo seguro de passos para a esquerda</span>
+    <span class="k">for</span> <span class="n">off</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">limite</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">+=</span> <span class="n">match</span> <span class="k">if</span> <span class="n">query</span><span class="p">[</span><span class="n">i_query</span> <span class="o">-</span> <span class="n">off</span><span class="p">]</span> <span class="o">==</span> <span class="n">seq</span><span class="p">[</span><span class="n">i_seq</span> <span class="o">-</span> <span class="n">off</span><span class="p">]</span> <span class="k">else</span> <span class="n">mismatch</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">off</span>
+    <span class="k">return</span> <span class="n">delta</span><span class="p">,</span> <span class="n">left</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extend_right</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">i_query</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                  <span class="n">match</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extensão à direita: devolve (delta_score, extensão_em_caracteres).&quot;&quot;&quot;</span>
+    <span class="c1"># número máximo de passos sem sair da string</span>
+    <span class="n">limite</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i_query</span> <span class="o">+</span> <span class="n">k</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">i_seq</span> <span class="o">+</span> <span class="n">k</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">off</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">limite</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">+=</span> <span class="n">match</span> <span class="k">if</span> <span class="n">query</span><span class="p">[</span><span class="n">i_query</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="n">off</span><span class="p">]</span> <span class="o">==</span> <span class="n">seq</span><span class="p">[</span><span class="n">i_seq</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="n">off</span><span class="p">]</span> <span class="k">else</span> <span class="n">mismatch</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">off</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">delta</span><span class="p">,</span> <span class="n">right</span>
+
+<span class="c1"># ---------- Funções públicas ----------</span>
+
+<div class="viewcode-block" id="gerar_palavras">
+<a class="viewcode-back" href="../../api.html#bioinf.blast.gerar_palavras">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gerar_palavras</span><span class="p">(</span><span class="n">seq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Divide uma sequência em palavras (k-mers).</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        seq (str): Sequência (query ou subject) a partir da qual são gerados k-mers.</span>
+<span class="sd">        k (int): Tamanho do k-mer. Default: 3.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[str]: Lista de k-mers consecutivos (janela deslizante).</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; gerar_palavras(&quot;ATGCA&quot;, k=3)</span>
+<span class="sd">        [&#39;ATG&#39;, &#39;TGC&#39;, &#39;GCA&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">-</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="indexar_banco">
+<a class="viewcode-back" href="../../api.html#bioinf.blast.indexar_banco">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">indexar_banco</span><span class="p">(</span><span class="n">banco</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cria um índice de k-mers para um banco de sequências.</span>
+<span class="sd">    </span>
+<span class="sd">    O índice mapeia cada k-mer para uma lista de ocorrências (id da sequência no banco,</span>
+<span class="sd">    posição inicial do k-mer nessa sequência).</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        banco (List[str]): Lista de sequências (subjects).</span>
+<span class="sd">        k (int): Tamanho do k-mer. Default: 3.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, List[Tuple[int, int]]]: Dicionário {k-mer: [(id_seq, pos), ...]}.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; indexar_banco([&quot;ATGCA&quot;], k=3)[&quot;TGC&quot;]</span>
+<span class="sd">        [(0, 1)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">indice</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">id_seq</span><span class="p">,</span> <span class="n">seq</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">banco</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">-</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">palavra</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">indice</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">palavra</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">id_seq</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">indice</span></div>
+
+
+<div class="viewcode-block" id="encontrar_hits">
+<a class="viewcode-back" href="../../api.html#bioinf.blast.encontrar_hits">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">encontrar_hits</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">indice</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]],</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encontra hits de k-mers da query num índice de banco.</span>
+<span class="sd">    </span>
+<span class="sd">    Para cada k-mer da query, devolve todas as ocorrências no banco.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        query (str): Sequência query.</span>
+<span class="sd">        indice (Dict[str, List[Tuple[int, int]]]): Índice produzido por `indexar_banco`.</span>
+<span class="sd">        k (int): Tamanho do k-mer. Default: 3.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Tuple[int, int, int]]: Lista de hits (pos_query, id_seq, pos_seq).</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; ind = indexar_banco([&quot;ATGCA&quot;], k=3)</span>
+<span class="sd">        &gt;&gt;&gt; encontrar_hits(&quot;TTGC&quot;, ind, k=3)</span>
+<span class="sd">        [(1, 0, 1)]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hits</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">palavra</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gerar_palavras</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">k</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">id_seq</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">indice</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">palavra</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">id_seq</span><span class="p">,</span> <span class="n">pos</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">hits</span></div>
+
+
+<div class="viewcode-block" id="estender_hit">
+<a class="viewcode-back" href="../../api.html#bioinf.blast.estender_hit">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">estender_hit</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">i_query</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">match</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estende um hit (seed) para ambos os lados e calcula o score.</span>
+<span class="sd">    </span>
+<span class="sd">    A extensão é feita com base em match/mismatch (não usa gaps). Devolve o alinhamento</span>
+<span class="sd">    local resultante como duas strings (substrings alinhadas por posição).</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        query (str): Sequência query.</span>
+<span class="sd">        seq (str): Sequência do banco (subject).</span>
+<span class="sd">        i_query (int): Índice inicial do hit na query.</span>
+<span class="sd">        i_seq (int): Índice inicial do hit no subject.</span>
+<span class="sd">        k (int): Tamanho do seed (k-mer). Default: 3.</span>
+<span class="sd">        match (int): Score para match. Default: 2.</span>
+<span class="sd">        mismatch (int): Score para mismatch. Default: -1.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[int, str, str]: (score_total, query_alinhada, subject_alinhada).</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; estender_hit(&quot;ATGCA&quot;, &quot;TTGCA&quot;, i_query=1, i_seq=1, k=3)</span>
+<span class="sd">        (6, &#39;TGCA&#39;, &#39;TGCA&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># pontuar o seed k-mer</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">_score_seed</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">i_query</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">)</span>
+    <span class="c1"># extensões esquerda e direita com loops de limites fixos (sem while)</span>
+    <span class="n">delta_esq</span><span class="p">,</span> <span class="n">left</span> <span class="o">=</span> <span class="n">_extend_left</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">i_query</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">)</span>
+    <span class="n">delta_dir</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">_extend_right</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">i_query</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">match</span><span class="p">,</span> <span class="n">mismatch</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">+=</span> <span class="p">(</span><span class="n">delta_esq</span> <span class="o">+</span> <span class="n">delta_dir</span><span class="p">)</span>
+
+    <span class="n">q_aln</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">i_query</span> <span class="o">-</span> <span class="n">left</span> <span class="p">:</span> <span class="n">i_query</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="n">right</span><span class="p">]</span>
+    <span class="n">s_aln</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="n">i_seq</span>   <span class="o">-</span> <span class="n">left</span> <span class="p">:</span> <span class="n">i_seq</span>   <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="n">right</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">,</span> <span class="n">q_aln</span><span class="p">,</span> <span class="n">s_aln</span></div>
+
+
+<div class="viewcode-block" id="blast_simplificado">
+<a class="viewcode-back" href="../../api.html#bioinf.blast.blast_simplificado">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">blast_simplificado</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banco</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Executa um BLAST simplificado baseado em seeds (k-mers) e extensão sem gaps.</span>
+<span class="sd">    </span>
+<span class="sd">    Pipeline:</span>
+<span class="sd">    1) Indexa o banco por k-mers.</span>
+<span class="sd">    2) Encontra hits de k-mers da query no índice.</span>
+<span class="sd">    3) Estende cada hit e calcula o score.</span>
+<span class="sd">    4) Ordena resultados por score (descendente).</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        query (str): Sequência query.</span>
+<span class="sd">        banco (List[str]): Lista de sequências do banco (subjects).</span>
+<span class="sd">        k (int): Tamanho do k-mer. Default: 3.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Tuple[int, int, str, str]]: Lista de resultados (score, id_seq, q_aln, s_aln)</span>
+<span class="sd">        ordenada por score desc.</span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; blast_simplificado(&quot;ATGCA&quot;, [&quot;TTGCA&quot;, &quot;AAAAA&quot;], k=3)[0][1]</span>
+<span class="sd">        0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">indice</span> <span class="o">=</span> <span class="n">indexar_banco</span><span class="p">(</span><span class="n">banco</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="n">encontrar_hits</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">indice</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+    <span class="n">melhores</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i_query</span><span class="p">,</span> <span class="n">id_seq</span><span class="p">,</span> <span class="n">i_seq</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+        <span class="n">score</span><span class="p">,</span> <span class="n">q_aln</span><span class="p">,</span> <span class="n">s_aln</span> <span class="o">=</span> <span class="n">estender_hit</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">banco</span><span class="p">[</span><span class="n">id_seq</span><span class="p">],</span> <span class="n">i_query</span><span class="p">,</span> <span class="n">i_seq</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+        <span class="n">melhores</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">score</span><span class="p">,</span> <span class="n">id_seq</span><span class="p">,</span> <span class="n">q_aln</span><span class="p">,</span> <span class="n">s_aln</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">melhores</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">AASB</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegação</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Código do módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Groupo7.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
