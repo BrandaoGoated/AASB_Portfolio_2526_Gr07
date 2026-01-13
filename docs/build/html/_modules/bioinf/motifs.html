@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html lang="pt" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bioinf.motifs &#8212; Documentação AASB 1.0</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=bbb231ee"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=beaedd51"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Pesquisar" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fonte de bioinf.motifs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># motifs.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># IUPAC (DNA) -&gt; regex + procura</span>
+<span class="c1"># =========================================================</span>
+
+<span class="n">IUPAC</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;A&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span> <span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="s2">&quot;G&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="s2">&quot;T&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="s2">&quot;[AG]&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span> <span class="s2">&quot;[CT]&quot;</span><span class="p">,</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="s2">&quot;[GC]&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">:</span> <span class="s2">&quot;[AT]&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="s2">&quot;[GT]&quot;</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">:</span> <span class="s2">&quot;[AC]&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="s2">&quot;[CGT]&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span> <span class="s2">&quot;[AGT]&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="s2">&quot;[ACT]&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">:</span> <span class="s2">&quot;[ACG]&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="s2">&quot;[ACGT]&quot;</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="iupac_para_regex">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.iupac_para_regex">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">iupac_para_regex</span><span class="p">(</span><span class="n">padrao</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converte um padrão IUPAC (DNA) para regex.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">padrao</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;padrao não pode ser None&quot;</span><span class="p">)</span>
+
+    <span class="n">padrao</span> <span class="o">=</span> <span class="n">padrao</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">padrao</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Padrão vazio&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">padrao</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IUPAC</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Símbolo IUPAC inválido: </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">IUPAC</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">padrao</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="procura_iupac">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.procura_iupac">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">procura_iupac</span><span class="p">(</span><span class="n">sequencia</span><span class="p">,</span> <span class="n">padrao</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Procura um padrão IUPAC numa sequência.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">sequencia</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;sequencia não pode ser None&quot;</span><span class="p">)</span>
+
+    <span class="n">sequencia</span> <span class="o">=</span> <span class="n">sequencia</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">iupac_para_regex</span><span class="p">(</span><span class="n">padrao</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">sequencia</span><span class="p">)]</span></div>
+
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># PROSITE -&gt; regex + procura</span>
+<span class="c1"># =========================================================</span>
+
+<div class="viewcode-block" id="prosite_para_regex">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.prosite_para_regex">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prosite_para_regex</span><span class="p">(</span><span class="n">prosite</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converte PROSITE (mínimo) para regex.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">prosite</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;prosite não pode ser None&quot;</span><span class="p">)</span>
+
+    <span class="n">prosite</span> <span class="o">=</span> <span class="n">prosite</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">prosite</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;PROSITE vazio&quot;</span><span class="p">)</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">prosite</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{([A-Z]+)\}&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;[^\1]&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\((\d+)\)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;{\1}&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\((\d+),(\d+)\)&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;{\1,\2}&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span></div>
+
+
+<div class="viewcode-block" id="procura_prosite">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.procura_prosite">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">procura_prosite</span><span class="p">(</span><span class="n">sequencia</span><span class="p">,</span> <span class="n">prosite</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Procura um padrão PROSITE numa sequência.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">sequencia</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;sequencia não pode ser None&quot;</span><span class="p">)</span>
+
+    <span class="n">sequencia</span> <span class="o">=</span> <span class="n">sequencia</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">prosite_para_regex</span><span class="p">(</span><span class="n">prosite</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">sequencia</span><span class="p">)]</span></div>
+
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># ENZIMAS DE RESTRIÇÃO (DNA)</span>
+<span class="c1"># =========================================================</span>
+
+<div class="viewcode-block" id="digestao_dna">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.digestao_dna">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">digestao_dna</span><span class="p">(</span><span class="n">sequencia</span><span class="p">,</span> <span class="n">sitio_restricao</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Faz digestão de DNA com sítio com &#39;^&#39; e devolve cortes e fragmentos.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">sequencia</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">sitio_restricao</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;sequencia/sitio_restricao não pode ser None&quot;</span><span class="p">)</span>
+
+    <span class="n">sequencia</span> <span class="o">=</span> <span class="n">sequencia</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">sitio_restricao</span> <span class="o">=</span> <span class="n">sitio_restricao</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s2">&quot;^&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sitio_restricao</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;O sítio de restrição deve conter &#39;^&#39;&quot;</span><span class="p">)</span>
+
+    <span class="n">pos_corte</span> <span class="o">=</span> <span class="n">sitio_restricao</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;^&quot;</span><span class="p">)</span>
+    <span class="n">motivo</span> <span class="o">=</span> <span class="n">sitio_restricao</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">motivo</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Motivo de restrição vazio&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pos_corte</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">pos_corte</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">motivo</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Posição de corte fora do intervalo&quot;</span><span class="p">)</span>
+
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">iupac_para_regex</span><span class="p">(</span><span class="n">motivo</span><span class="p">)</span>
+
+    <span class="n">inicios</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">sequencia</span><span class="p">)]</span>
+    <span class="n">cortes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">i</span> <span class="o">+</span> <span class="n">pos_corte</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inicios</span><span class="p">]))</span>
+
+    <span class="n">fragmentos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ultimo</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cortes</span><span class="p">:</span>
+        <span class="n">fragmentos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sequencia</span><span class="p">[</span><span class="n">ultimo</span><span class="p">:</span><span class="n">c</span><span class="p">])</span>
+        <span class="n">ultimo</span> <span class="o">=</span> <span class="n">c</span>
+    <span class="n">fragmentos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sequencia</span><span class="p">[</span><span class="n">ultimo</span><span class="p">:])</span>
+
+    <span class="k">return</span> <span class="n">cortes</span><span class="p">,</span> <span class="n">fragmentos</span></div>
+
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># PWM (com pseudocontagem=1)</span>
+<span class="c1"># =========================================================</span>
+
+<div class="viewcode-block" id="tabela_contagens">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.tabela_contagens">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tabela_contagens</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="n">alfabeto</span><span class="o">=</span><span class="s2">&quot;ACGT&quot;</span><span class="p">,</span> <span class="n">pseudocontagem</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Conta símbolos por posição (com pseudocontagem).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">seqs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lista de sequências vazia&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seqs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;As sequências não têm todas o mesmo tamanho!&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">{</span><span class="n">b</span><span class="p">:</span> <span class="n">ocorrencias</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">pseudocontagem</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">alfabeto</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">ocorrencias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">seqs</span><span class="p">)</span>
+    <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="pwm">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.pwm">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pwm</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="n">tipo</span><span class="o">=</span><span class="s2">&quot;DNA&quot;</span><span class="p">,</span> <span class="n">pseudocontagem</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cria uma PWM (probabilidades) a partir de sequências.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">seqs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Lista de sequências vazia&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">seqs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;As sequências não têm todas o mesmo tamanho!&quot;</span><span class="p">)</span>
+
+    <span class="n">tipo</span> <span class="o">=</span> <span class="n">tipo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tipo</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;DNA&quot;</span><span class="p">,</span> <span class="s2">&quot;PROTEIN&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tipo inválido: </span><span class="si">{</span><span class="n">tipo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">alfabeto</span> <span class="o">=</span> <span class="s2">&quot;ACGT&quot;</span> <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s2">&quot;DNA&quot;</span> <span class="k">else</span> <span class="s2">&quot;ARNDCQEGHILKMFPSTWYVBZX_&quot;</span>
+    <span class="n">tabela</span> <span class="o">=</span> <span class="n">tabela_contagens</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="n">alfabeto</span><span class="o">=</span><span class="n">alfabeto</span><span class="p">,</span> <span class="n">pseudocontagem</span><span class="o">=</span><span class="n">pseudocontagem</span><span class="p">)</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seqs</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alfabeto</span><span class="p">)</span>
+    <span class="n">denominador</span> <span class="o">=</span> <span class="n">n</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">pseudocontagem</span>
+
+    <span class="k">return</span> <span class="p">[{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="o">/</span> <span class="n">denominador</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">coluna</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">coluna</span> <span class="ow">in</span> <span class="n">tabela</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="imprime_pwm">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.imprime_pwm">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">imprime_pwm</span><span class="p">(</span><span class="n">matriz_pwm</span><span class="p">,</span> <span class="n">casas</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Arredonda valores da PWM.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[{</span><span class="n">k</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">casas</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">matriz_pwm</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="prob_gerar_sequencia">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.prob_gerar_sequencia">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prob_gerar_sequencia</span><span class="p">(</span><span class="n">sequencia</span><span class="p">,</span> <span class="n">matriz_pwm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Probabilidade de uma sequência segundo a PWM.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequencia</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matriz_pwm</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tamanho da sequência e do motif não são iguais!&quot;</span><span class="p">)</span>
+
+    <span class="n">prob</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="k">for</span> <span class="n">letra</span><span class="p">,</span> <span class="n">coluna</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sequencia</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">matriz_pwm</span><span class="p">):</span>
+        <span class="n">prob</span> <span class="o">*=</span> <span class="n">coluna</span><span class="p">[</span><span class="n">letra</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">prob</span></div>
+
+
+<div class="viewcode-block" id="seq_mais_provavel">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.seq_mais_provavel">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">seq_mais_provavel</span><span class="p">(</span><span class="n">sequencia</span><span class="p">,</span> <span class="n">matriz_pwm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Devolve a(s) janela(s) mais provável(eis) segundo a PWM.&quot;&quot;&quot;</span>
+    <span class="n">sequencia</span> <span class="o">=</span> <span class="n">sequencia</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matriz_pwm</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequencia</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">l</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A sequência tem que ser &gt;= ao motif!&quot;</span><span class="p">)</span>
+
+    <span class="n">janelas</span> <span class="o">=</span> <span class="p">[</span><span class="n">sequencia</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">l</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequencia</span><span class="p">)</span> <span class="o">-</span> <span class="n">l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">:</span> <span class="n">prob_gerar_sequencia</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">matriz_pwm</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">janelas</span><span class="p">}</span>
+    <span class="n">maior</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">probs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="n">maior</span><span class="p">]))</span></div>
+
+
+
+<span class="c1"># =========================================================</span>
+<span class="c1"># PSSM + scoring + melhor subsequência</span>
+<span class="c1"># =========================================================</span>
+
+<div class="viewcode-block" id="pssm_de_pwm">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.pssm_de_pwm">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">pssm_de_pwm</span><span class="p">(</span><span class="n">matriz_pwm</span><span class="p">,</span> <span class="n">alfabeto</span><span class="o">=</span><span class="s2">&quot;ACGT&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converte PWM em PSSM (log2(p/bg)).&quot;&quot;&quot;</span>
+    <span class="n">bg</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">alfabeto</span><span class="p">)</span>
+    <span class="n">pssm</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">coluna</span> <span class="ow">in</span> <span class="n">matriz_pwm</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">alfabeto</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">coluna</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">p</span> <span class="o">/</span> <span class="n">bg</span><span class="p">)</span>
+        <span class="n">pssm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pssm</span></div>
+
+
+<div class="viewcode-block" id="score_kmer">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.score_kmer">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">score_kmer</span><span class="p">(</span><span class="n">pssm</span><span class="p">,</span> <span class="n">kmer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Score de um kmer segundo a PSSM.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kmer</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pssm</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;O comprimento do kmer deve coincidir com a PSSM&quot;</span><span class="p">)</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">kmer</span><span class="o">.</span><span class="n">upper</span><span class="p">()):</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="n">pssm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+<div class="viewcode-block" id="melhor_subsequencia">
+<a class="viewcode-back" href="../../api.html#bioinf.motifs.melhor_subsequencia">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">melhor_subsequencia</span><span class="p">(</span><span class="n">pssm</span><span class="p">,</span> <span class="n">sequencia</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Melhor subsequência segundo a PSSM (kmer, posição, score).&quot;&quot;&quot;</span>
+    <span class="n">sequencia</span> <span class="o">=</span> <span class="n">sequencia</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pssm</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;PSSM vazia&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequencia</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">k</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sequência mais curta do que o motif&quot;</span><span class="p">)</span>
+
+    <span class="n">melhor</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">melhor_pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">melhor_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequencia</span><span class="p">)</span> <span class="o">-</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">kmer</span> <span class="o">=</span> <span class="n">sequencia</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="n">k</span><span class="p">]</span>
+        <span class="n">sc</span> <span class="o">=</span> <span class="n">score_kmer</span><span class="p">(</span><span class="n">pssm</span><span class="p">,</span> <span class="n">kmer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sc</span> <span class="o">&gt;</span> <span class="n">melhor_score</span><span class="p">:</span>
+            <span class="n">melhor_score</span> <span class="o">=</span> <span class="n">sc</span>
+            <span class="n">melhor</span> <span class="o">=</span> <span class="n">kmer</span>
+            <span class="n">melhor_pos</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="k">return</span> <span class="n">melhor</span><span class="p">,</span> <span class="n">melhor_pos</span><span class="p">,</span> <span class="n">melhor_score</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">AASB</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegação</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Código do módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Groupo7.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html lang="pt" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Reference &#8212; Documentação AASB 1.0</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=bbb231ee"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/translations.js?v=beaedd51"></script>
+    <link rel="index" title="Índice" href="genindex.html" />
+    <link rel="search" title="Pesquisar" href="search.html" />
+    <link rel="prev" title="AASB documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
+<section id="module-bioinf.sequencias">
+<span id="bioinf-sequencias"></span><h2>bioinf.sequencias<a class="headerlink" href="#module-bioinf.sequencias" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.sequencias.dna">
+<span class="sig-prename descclassname"><span class="pre">bioinf.sequencias.</span></span><span class="sig-name descname"><span class="pre">dna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/sequencias.html#dna"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.sequencias.dna" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica se uma sequência é DNA válido (apenas A, C, G, T).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.sequencias.dna_para_rna">
+<span class="sig-prename descclassname"><span class="pre">bioinf.sequencias.</span></span><span class="sig-name descname"><span class="pre">dna_para_rna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/sequencias.html#dna_para_rna"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.sequencias.dna_para_rna" title="Link to this definition">¶</a></dt>
+<dd><p>Transcreve DNA para RNA (T -&gt; U).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.sequencias.dna_reverso">
+<span class="sig-prename descclassname"><span class="pre">bioinf.sequencias.</span></span><span class="sig-name descname"><span class="pre">dna_reverso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/sequencias.html#dna_reverso"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.sequencias.dna_reverso" title="Link to this definition">¶</a></dt>
+<dd><p>Calcula o reverso complementar de uma sequência de DNA.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.sequencias.proteina">
+<span class="sig-prename descclassname"><span class="pre">bioinf.sequencias.</span></span><span class="sig-name descname"><span class="pre">proteina</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/sequencias.html#proteina"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.sequencias.proteina" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica se uma sequência é proteína válida (20 aminoácidos padrão).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.sequencias.rna">
+<span class="sig-prename descclassname"><span class="pre">bioinf.sequencias.</span></span><span class="sig-name descname"><span class="pre">rna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/sequencias.html#rna"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.sequencias.rna" title="Link to this definition">¶</a></dt>
+<dd><p>Verifica se uma sequência é RNA válido (apenas A, C, G, U).</p>
+</dd></dl>
+
+</section>
+<section id="module-bioinf.motifs">
+<span id="bioinf-motifs"></span><h2>bioinf.motifs<a class="headerlink" href="#module-bioinf.motifs" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.digestao_dna">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">digestao_dna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sitio_restricao</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#digestao_dna"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.digestao_dna" title="Link to this definition">¶</a></dt>
+<dd><p>Faz digestão de DNA com sítio com “^” e devolve cortes e fragmentos.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.imprime_pwm">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">imprime_pwm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matriz_pwm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">casas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#imprime_pwm"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.imprime_pwm" title="Link to this definition">¶</a></dt>
+<dd><p>Arredonda valores da PWM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.iupac_para_regex">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">iupac_para_regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padrao</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#iupac_para_regex"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.iupac_para_regex" title="Link to this definition">¶</a></dt>
+<dd><p>Converte um padrão IUPAC (DNA) para regex.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.melhor_subsequencia">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">melhor_subsequencia</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pssm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencia</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#melhor_subsequencia"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.melhor_subsequencia" title="Link to this definition">¶</a></dt>
+<dd><p>Melhor subsequência segundo a PSSM (kmer, posição, score).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.prob_gerar_sequencia">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">prob_gerar_sequencia</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matriz_pwm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#prob_gerar_sequencia"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.prob_gerar_sequencia" title="Link to this definition">¶</a></dt>
+<dd><p>Probabilidade de uma sequência segundo a PWM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.procura_iupac">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">procura_iupac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padrao</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#procura_iupac"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.procura_iupac" title="Link to this definition">¶</a></dt>
+<dd><p>Procura um padrão IUPAC numa sequência.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.procura_prosite">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">procura_prosite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prosite</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#procura_prosite"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.procura_prosite" title="Link to this definition">¶</a></dt>
+<dd><p>Procura um padrão PROSITE numa sequência.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.prosite_para_regex">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">prosite_para_regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prosite</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#prosite_para_regex"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.prosite_para_regex" title="Link to this definition">¶</a></dt>
+<dd><p>Converte PROSITE (mínimo) para regex.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.pssm_de_pwm">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">pssm_de_pwm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matriz_pwm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alfabeto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ACGT'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#pssm_de_pwm"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.pssm_de_pwm" title="Link to this definition">¶</a></dt>
+<dd><p>Converte PWM em PSSM (log2(p/bg)).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.pwm">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">pwm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tipo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DNA'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudocontagem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#pwm"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.pwm" title="Link to this definition">¶</a></dt>
+<dd><p>Cria uma PWM (probabilidades) a partir de sequências.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.score_kmer">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">score_kmer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pssm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#score_kmer"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.score_kmer" title="Link to this definition">¶</a></dt>
+<dd><p>Score de um kmer segundo a PSSM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.seq_mais_provavel">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">seq_mais_provavel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencia</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matriz_pwm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#seq_mais_provavel"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.seq_mais_provavel" title="Link to this definition">¶</a></dt>
+<dd><p>Devolve a(s) janela(s) mais provável(eis) segundo a PWM.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.motifs.tabela_contagens">
+<span class="sig-prename descclassname"><span class="pre">bioinf.motifs.</span></span><span class="sig-name descname"><span class="pre">tabela_contagens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alfabeto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ACGT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pseudocontagem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bioinf/motifs.html#tabela_contagens"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.motifs.tabela_contagens" title="Link to this definition">¶</a></dt>
+<dd><p>Conta símbolos por posição (com pseudocontagem).</p>
+</dd></dl>
+
+</section>
+<section id="module-bioinf.alignments">
+<span id="bioinf-alignments"></span><h2>bioinf.alignments<a class="headerlink" href="#module-bioinf.alignments" title="Link to this heading">¶</a></h2>
+<p>Algoritmos de Alinhamento de Sequências</p>
+<p>Inclui:
+- Matrizes de substituição simples (PAM/BLOSUM-like reduzidas)
+- Needleman-Wunsch (alinhamento global): score + reconstrução
+- Smith-Waterman (alinhamento local): score + reconstrução
+- Alinhamento progressivo (múltiplo): consenso + alinhamento</p>
+</section>
+<section id="module-bioinf.blast">
+<span id="bioinf-blast"></span><h2>bioinf.blast<a class="headerlink" href="#module-bioinf.blast" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.blast.blast_simplificado">
+<span class="sig-prename descclassname"><span class="pre">bioinf.blast.</span></span><span class="sig-name descname"><span class="pre">blast_simplificado</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">banco</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bioinf/blast.html#blast_simplificado"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.blast.blast_simplificado" title="Link to this definition">¶</a></dt>
+<dd><p>Executa BLAST simplificado.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.blast.encontrar_hits">
+<span class="sig-prename descclassname"><span class="pre">bioinf.blast.</span></span><span class="sig-name descname"><span class="pre">encontrar_hits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bioinf/blast.html#encontrar_hits"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.blast.encontrar_hits" title="Link to this definition">¶</a></dt>
+<dd><p>Encontra todas as ocorrências das palavras da query no banco.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.blast.estender_hit">
+<span class="sig-prename descclassname"><span class="pre">bioinf.blast.</span></span><span class="sig-name descname"><span class="pre">estender_hit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_seq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mismatch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bioinf/blast.html#estender_hit"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.blast.estender_hit" title="Link to this definition">¶</a></dt>
+<dd><p>Estende um hit para ambos os lados e calcula score.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.blast.gerar_palavras">
+<span class="sig-prename descclassname"><span class="pre">bioinf.blast.</span></span><span class="sig-name descname"><span class="pre">gerar_palavras</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bioinf/blast.html#gerar_palavras"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.blast.gerar_palavras" title="Link to this definition">¶</a></dt>
+<dd><p>Divide a sequência em palavras (k-mers).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.blast.indexar_banco">
+<span class="sig-prename descclassname"><span class="pre">bioinf.blast.</span></span><span class="sig-name descname"><span class="pre">indexar_banco</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">banco</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bioinf/blast.html#indexar_banco"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.blast.indexar_banco" title="Link to this definition">¶</a></dt>
+<dd><p>Cria um índice {k-mer: [(id_seq, pos)]} para todas as sequências do banco.</p>
+</dd></dl>
+
+</section>
+<section id="module-bioinf.filo">
+<span id="bioinf-filo"></span><h2>bioinf.filo<a class="headerlink" href="#module-bioinf.filo" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.filo.calcular_matriz_distancias">
+<span class="sig-prename descclassname"><span class="pre">bioinf.filo.</span></span><span class="sig-name descname"><span class="pre">calcular_matriz_distancias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequencias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/bioinf/filo.html#calcular_matriz_distancias"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.filo.calcular_matriz_distancias" title="Link to this definition">¶</a></dt>
+<dd><p>Calcula a matriz de distâncias usando <strong>p-distância</strong>.</p>
+<p>Usa cada sequência como etiqueta (chave do dicionário). Para projetos
+reais em que possa haver sequências iguais com nomes diferentes, é
+recomendável passar nomes explicitamente — aqui segue o enunciado.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sequencias</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Lista de sequências (todas com o mesmo tamanho).</p>
+</dd>
+<dt class="field-even">Retorno<span class="colon">:</span></dt>
+<dd class="field-even"><p>Matriz de distâncias simétrica (0 na diagonal).</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Dict[str, float]]</p>
+</dd>
+<dt class="field-even">Levanta<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – Se a lista for vazia ou se os comprimentos diferirem.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bioinf.filo.upgma">
+<span class="sig-prename descclassname"><span class="pre">bioinf.filo.</span></span><span class="sig-name descname"><span class="pre">upgma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matriz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/bioinf/filo.html#upgma"><span class="viewcode-link"><span class="pre">[código</span> <span class="pre">fonte]</span></span></a><a class="headerlink" href="#bioinf.filo.upgma" title="Link to this definition">¶</a></dt>
+<dd><p>Constrói uma árvore filogenética com <strong>UPGMA</strong> e retorna em <strong>Newick</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parâmetros<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>matriz</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>float</em><em>]</em><em>]</em>) – Matriz de distâncias simétrica
+com 0 na diagonal (ex.: saída de <cite>calcular_matriz_distancias</cite>).</p>
+</dd>
+<dt class="field-even">Retorno<span class="colon">:</span></dt>
+<dd class="field-even"><p>Árvore em formato Newick terminada com <cite>;</cite>.</p>
+</dd>
+<dt class="field-odd">Tipo de retorno<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Caso trivial: 0 clusters → retorna apenas <cite>;</cite>.</p></li>
+<li><p>Caso trivial: 1 cluster  → retorna a etiqueta + <cite>;</cite>.</p></li>
+<li><p>As etiquetas usadas são as chaves da matriz (neste projeto, as próprias sequências).</p></li>
+</ul>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">AASB</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegação</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-bioinf.sequencias">bioinf.sequencias</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bioinf.motifs">bioinf.motifs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bioinf.alignments">bioinf.alignments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bioinf.blast">bioinf.blast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bioinf.filo">bioinf.filo</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="capítulo anterior">AASB documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Groupo7.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
