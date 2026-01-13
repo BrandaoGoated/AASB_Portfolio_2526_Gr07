@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html lang="pt" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>bioinf.filo &#8212; Documentação AASB 1.0</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=bbb231ee"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/translations.js?v=beaedd51"></script>
+    <link rel="index" title="Índice" href="../../genindex.html" />
+    <link rel="search" title="Pesquisar" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fonte de bioinf.filo</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="c1"># filo.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">combinations</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;calcular_matriz_distancias&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;upgma&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># ---------------------------------------------------------------------</span>
+<span class="c1"># Helpers de distância (baixam complexidade das funções públicas)</span>
+<span class="c1"># ---------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pdist</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    p-distância: proporção de posições diferentes entre duas sequências.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a (str): Sequência 1.</span>
+<span class="sd">        b (str): Sequência 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Proporção de diferenças em [0, 1].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">dif</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">c1</span> <span class="o">!=</span> <span class="n">c2</span> <span class="k">for</span> <span class="n">c1</span><span class="p">,</span> <span class="n">c2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">dif</span> <span class="o">/</span> <span class="n">n</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_equal_lengths</span><span class="p">(</span><span class="n">sequencias</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Valida que a lista não é vazia e que todas as sequências têm o mesmo tamanho.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sequencias (List[str]): Lista de sequências.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Se a lista for vazia ou se houver tamanhos distintos.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sequencias</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A lista de sequências não pode ser vazia.&quot;</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequencias</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sequencias</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Todas as sequências devem ter o mesmo tamanho.&quot;</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------</span>
+<span class="c1"># API pública: Matriz de Distâncias</span>
+<span class="c1"># ---------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="calcular_matriz_distancias">
+<a class="viewcode-back" href="../../api.html#bioinf.filo.calcular_matriz_distancias">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calcular_matriz_distancias</span><span class="p">(</span><span class="n">sequencias</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcula a matriz de distâncias usando **p-distância**.</span>
+
+<span class="sd">    Usa cada sequência como etiqueta (chave do dicionário). Para projetos</span>
+<span class="sd">    reais em que possa haver sequências iguais com nomes diferentes, é</span>
+<span class="sd">    recomendável passar nomes explicitamente — aqui segue o enunciado.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sequencias (List[str]): Lista de sequências (todas com o mesmo tamanho).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Dict[str, float]]: Matriz de distâncias simétrica (0 na diagonal).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Se a lista for vazia ou se os comprimentos diferirem.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_validate_equal_lengths</span><span class="p">(</span><span class="n">sequencias</span><span class="p">)</span>
+    <span class="n">nomes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sequencias</span><span class="p">)</span>
+
+    <span class="n">matriz</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nomes</span><span class="p">}</span>
+    <span class="c1"># Diagonal</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">nomes</span><span class="p">:</span>
+        <span class="n">matriz</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="c1"># Metade superior (e espelhar para a inferior)</span>
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">nomes</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">_pdist</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">matriz</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="n">matriz</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+    <span class="k">return</span> <span class="n">matriz</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------</span>
+<span class="c1"># Helpers de UPGMA</span>
+<span class="c1"># ---------------------------------------------------------------------</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_closest_pair</span><span class="p">(</span><span class="n">matriz</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                  <span class="n">clusters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encontra o par de clusters com menor distância.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[str, str, float]: (a, b, dmin) com a &lt;-&gt; b o par mais próximo.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">best_a</span> <span class="o">=</span> <span class="n">best_b</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">best</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">clusters</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">matriz</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="n">d</span>
+            <span class="n">best_a</span><span class="p">,</span> <span class="n">best_b</span> <span class="o">=</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">best_a</span><span class="p">,</span> <span class="n">best_b</span><span class="p">,</span> <span class="n">best</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_newick_join</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dist_ab</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">clusters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Une dois clusters em Newick e calcula a nova altura (UPGMA).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a, b (str): Clusters a unir.</span>
+<span class="sd">        dist_ab (float): Distância entre a e b.</span>
+<span class="sd">        clusters: Mapa etiqueta -&gt; (newick, altura).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[str, float]: (novo_newick, nova_altura).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">altura</span> <span class="o">=</span> <span class="n">dist_ab</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">na</span><span class="p">,</span> <span class="n">ha</span> <span class="o">=</span> <span class="n">clusters</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+    <span class="n">nb</span><span class="p">,</span> <span class="n">hb</span> <span class="o">=</span> <span class="n">clusters</span><span class="p">[</span><span class="n">b</span><span class="p">]</span>
+    <span class="n">ramo_a</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">altura</span> <span class="o">-</span> <span class="n">ha</span><span class="p">)</span>
+    <span class="n">ramo_b</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">altura</span> <span class="o">-</span> <span class="n">hb</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">na</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ramo_a</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">nb</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">ramo_b</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">altura</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_average_linkage_row</span><span class="p">(</span><span class="n">matriz</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                         <span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">novo</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                         <span class="n">restantes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cria as distâncias do novo cluster para os restantes via média aritmética.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">matriz</span><span class="p">[</span><span class="n">novo</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">restantes</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">matriz</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">matriz</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="n">k</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">matriz</span><span class="p">[</span><span class="n">novo</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="n">matriz</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">novo</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
+    <span class="n">matriz</span><span class="p">[</span><span class="n">novo</span><span class="p">][</span><span class="n">novo</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_old_clusters</span><span class="p">(</span><span class="n">matriz</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+                         <span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove linhas/colunas dos clusters a e b da matriz.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="n">matriz</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">linha</span> <span class="ow">in</span> <span class="n">matriz</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">linha</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------</span>
+<span class="c1"># API pública: UPGMA</span>
+<span class="c1"># ---------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="upgma">
+<a class="viewcode-back" href="../../api.html#bioinf.filo.upgma">[documentos]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">upgma</span><span class="p">(</span><span class="n">matriz</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constrói uma árvore filogenética com **UPGMA** e retorna em **Newick**.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        matriz (Dict[str, Dict[str, float]]): Matriz de distâncias simétrica</span>
+<span class="sd">            com 0 na diagonal (ex.: saída de `calcular_matriz_distancias`).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Árvore em formato Newick terminada com `;`.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - Caso trivial: 0 clusters → retorna apenas `;`.</span>
+<span class="sd">        - Caso trivial: 1 cluster  → retorna a etiqueta + `;`.</span>
+<span class="sd">        - As etiquetas usadas são as chaves da matriz (neste projeto, as próprias sequências).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># clusters: etiqueta -&gt; (newick, altura)</span>
+    <span class="n">clusters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">matriz</span><span class="o">.</span><span class="n">keys</span><span class="p">())}</span>
+
+    <span class="c1"># Casos triviais</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">clusters</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">clusters</span><span class="p">))</span><span class="si">}</span><span class="s2">;&quot;</span>
+
+    <span class="c1"># Itera até restar um cluster (a raiz)</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">dmin</span> <span class="o">=</span> <span class="n">_closest_pair</span><span class="p">(</span><span class="n">matriz</span><span class="p">,</span> <span class="n">clusters</span><span class="p">)</span>
+
+        <span class="n">novo_newick</span><span class="p">,</span> <span class="n">altura</span> <span class="o">=</span> <span class="n">_newick_join</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">dmin</span><span class="p">,</span> <span class="n">clusters</span><span class="p">)</span>
+
+        <span class="c1"># Prepara chaves restantes (atuais na matriz) sem (a, b)</span>
+        <span class="n">restantes</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">matriz</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)]</span>
+
+        <span class="c1"># Cria linha/coluna do novo cluster antes de remover a/b</span>
+        <span class="n">_average_linkage_row</span><span class="p">(</span><span class="n">matriz</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">novo_newick</span><span class="p">,</span> <span class="n">restantes</span><span class="p">)</span>
+
+        <span class="c1"># Remove antigos e atualiza clusters</span>
+        <span class="n">_remove_old_clusters</span><span class="p">(</span><span class="n">matriz</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">clusters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">clusters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">clusters</span><span class="p">[</span><span class="n">novo_newick</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">novo_newick</span><span class="p">,</span> <span class="n">altura</span><span class="p">)</span>
+
+    <span class="c1"># Único elemento remanescente é a raiz em Newick</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">clusters</span><span class="p">))</span><span class="si">}</span><span class="s2">;&quot;</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">AASB</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Ir" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navegação</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Código do módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2026, Groupo7.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
