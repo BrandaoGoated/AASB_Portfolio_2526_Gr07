@@ -1,10 +1,4 @@
 # AASB_Portfolio_2526_Gr07
-Aqui vai uma versão corrigida (sem “ficar tudo em bash”) e com a tree simplificada para não aparecer nessa linha gigante. O problema acontece quando a fence de Markdown não fecha bem; por isso deixo tudo com blocos curtos e bem fechados (cada bloco começa e termina em ```). [file:17]
-
-Copia e cola isto tudo para o teu README.md:
-
-text
-# Portefólio de Algoritmos para Análise de Sequências Biológicas (AASB 2025/2026)
 
 Biblioteca Python que implementa os principais algoritmos abordados na UC.
 O projeto foi desenvolvido com foco em correção algorítmica, qualidade de código, documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo facilmente importável e reutilizável por terceiros.[3]
