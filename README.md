@@ -2,37 +2,37 @@
 
 # Portefólio de Algoritmos para análise de sequências biológicas (AASB 2025/2026)
 
-Biblioteca Python que implementa os principais algoritmos abordados na UC. O projeto foi desenvolvido com foco em correção algorítmica, qualidade de código, documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo facilmente importável e reutilizável por terceiros. [file:16]
+Este portefólio é focado em criar uma biblioteca Python que tem como objetivo principal fazer código e posteriormente por o mesmo à prova. Sendo isto feito através da análise da qualidade de código através do Radon, de realização de documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo também facilmente importável.
 
 ---
 
 ## Conteúdo do Projeto
 
-Este portefólio inclui implementações dos seguintes tópicos: [file:16]
+Este portefólio inclui implementações dos seguintes tópicos:
 
 ### 1. Sequências Biológicas
-- Validação de sequências (DNA, RNA e proteínas). [file:22]
-- Transcrição DNA → RNA. [file:22]
-- Reverso-complemento de DNA. [file:22]
+- Validação de sequências (DNA, RNA e proteínas). 
+- Transcrição DNA → RNA.
+- Reverso-complemento de DNA. 
 
 ### 2. Alinhamento de Sequências
-- Matriz de substituição BLOSUM62. [file:18]
-- Needleman–Wunsch (alinhamento global): score + reconstrução. [file:18]
-- Smith–Waterman (alinhamento local): score + reconstrução. [file:18]
-- Alinhamento múltiplo progressivo + consenso. [file:18]
+- Matriz de substituição BLOSUM62. 
+- Needleman–Wunsch (alinhamento global): score + reconstrução.
+- Smith–Waterman (alinhamento local): score + reconstrução. 
+- Alinhamento múltiplo progressivo + consenso. 
 
 ### 3. Motifs e Padrões
-- Procura de padrões com ambiguidades (IUPAC). [file:23]
-- Conversão PROSITE → expressões regulares. [file:23]
-- Digestão por enzimas de restrição (regex/cortes/fragmentação). [file:23]
-- PWM e PSSM: construção, probabilidade e melhor subsequência. [file:23]
+- Procura de padrões com ambiguidades (IUPAC). 
+- Conversão PROSITE → expressões regulares. 
+- Digestão por enzimas de restrição (regex/cortes/fragmentação). 
+- PWM e PSSM: construção, probabilidade e melhor subsequência. 
 
 ### 4. BLAST Simplificado
-- Geração de k-mers, indexação do banco, hits, extensão e melhor alinhamento. [file:25]
+- Geração de k-mers, indexação do banco, hits, extensão e melhor alinhamento. 
 
 ### 5. Análise Filogenética
-- Construção de matriz de distâncias por p-distância. [file:21]
-- UPGMA: construção de árvore em formato Newick. [file:21]
+- Construção de matriz de distâncias por p-distância. 
+- UPGMA: construção de árvore em formato Newick. 
 
 ---
 
@@ -212,8 +212,8 @@ radon mi bioinf/ -s
 ## Autores
 Grupo 07 —
     David Brandão - PG59418
-    Nome 2 (nº)
-    Nome 3 (nº)
+    José Campos - PG54900
+    Ricardo Oliveira - PG59763
 
 UC: Algoritmos e Análise de Sistemas Biológicos
 Ano letivo: 2025/2026
