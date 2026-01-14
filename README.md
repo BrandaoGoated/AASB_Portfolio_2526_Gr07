@@ -1,179 +1,56 @@
 # AASB_Portfolio_2526_Gr07
 
-# Portefólio de Algoritmos para Análise de Sequências Biológicas (AASB 2025/2026)
+# Portefólio de Algoritmos para análise de sequências biológicas (AASB 2025/2026)
 
-Biblioteca Python que implementa os principais algoritmos abordados na UC.
-O projeto foi desenvolvido com foco em correção algorítmica, qualidade de código, documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo facilmente importável e reutilizável por terceiros.
-
----
-
-## Estrutura do projeto (simplificada)
-
-.
-├── requirements.txt
-├── bioinf/
-│   ├── __init__.py
-│   ├── alignments.py
-│   ├── blast.py
-│   ├── filo.py
-│   ├── motifs.py
-│   └── sequencias.py
-├── tests/
-│   ├── test_alignments_unittest.py
-│   ├── test_blast.py
-│   ├── test_filo.py
-│   ├── test_motifs.py
-│   └── test_sequencias.py
-├── docs/          # Sphinx (source + build/html)
-├── exemplos/
-├── radon/         # relatórios Radon (json)
-└── htmlcov/       # relatório coverage (HTML)
+Biblioteca Python que implementa os principais algoritmos abordados na UC. O projeto foi desenvolvido com foco em correção algorítmica, qualidade de código, documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo facilmente importável e reutilizável por terceiros. [file:16]
 
 ---
 
-## Instalação
+## Conteúdo do Projeto
 
-pip install -r requirements.txt
+Este portefólio inclui implementações dos seguintes tópicos: [file:16]
+
+### 1. Sequências Biológicas
+- Validação de sequências (DNA, RNA e proteínas). [file:22]
+- Transcrição DNA → RNA. [file:22]
+- Reverso-complemento de DNA. [file:22]
+
+### 2. Alinhamento de Sequências
+- Matriz de substituição BLOSUM62. [file:18]
+- Needleman–Wunsch (alinhamento global): score + reconstrução. [file:18]
+- Smith–Waterman (alinhamento local): score + reconstrução. [file:18]
+- Alinhamento múltiplo progressivo + consenso. [file:18]
+
+### 3. Motifs e Padrões
+- Procura de padrões com ambiguidades (IUPAC). [file:23]
+- Conversão PROSITE → expressões regulares. [file:23]
+- Digestão por enzimas de restrição (regex/cortes/fragmentação). [file:23]
+- PWM e PSSM: construção, probabilidade e melhor subsequência. [file:23]
+
+### 4. BLAST Simplificado
+- Geração de k-mers, indexação do banco, hits, extensão e melhor alinhamento. [file:25]
+
+### 5. Análise Filogenética
+- Construção de matriz de distâncias por p-distância. [file:21]
+- UPGMA: construção de árvore em formato Newick. [file:21]
 
 ---
 
-## Uso dos códigos
+# Uso dos códigos
 
-Nota: exemplos assumem execução a partir da raiz do projeto (package `bioinf` acessível).
+## `sequencias.py`
 
-### bioinf/sequencias.py
-
+```python
 from bioinf.sequencias import dna, rna, proteina, dna_para_rna, dna_reverso
 
-print(dna("ACTG"))          # "DNA Válido"
-print(dna("ANT"))           # "DNA Inválido"
-print(rna("ACGU"))          # "RNA Válido"
-print(proteina("ACDE"))     # "Proteína Válida" (exemplo)
+# Validação
+print(dna("ACTG"))                     # "DNA Válido"
+print(rna("ACGU"))                     # "RNA Válido"
+print(proteina("ACDEFGHIKLMNPQRSTVWY"))# "Proteína Válida"
 
-print(dna_para_rna("ACT"))  # "ACU"
-print(dna_reverso("ACT"))   # "AGT" (exemplo)
+# Transcrição DNA -> RNA
+print(dna_para_rna("ATGC"))            # "AUGC"
 
-### bioinf/alignments.py
-
-from bioinf.alignments import (
-    Blosum62,
-    needleman_wunsch,
-    smith_waterman,
-    consensus,
-    progressive_alignment,
-)
-
-bl = Blosum62()
-
-score_g, a1_g, a2_g = needleman_wunsch("AC", "AG", bl)
-print("Global:", score_g, a1_g, a2_g)
-
-score_l, a1_l, a2_l = smith_waterman("AC", "AG", bl)
-print("Local:", score_l, a1_l, a2_l)
-
-aln = ["AC-", "A-G", "AAG"]
-print("Consenso:", consensus(aln))
-
-seqs = ["AC", "AG", "AT"]
-print("Progressivo:", progressive_alignment(seqs, bl))
-
-### bioinf/motifs.py
-
-from bioinf.motifs import (
-    iupac_para_regex,
-    procura_iupac,
-    prosite_para_regex,
-    procura_prosite,
-    digestao_dna,
-    pwm,
-    pssm_de_pwm,
-    score_kmer,
-    melhor_subsequencia,
-)
-
-print(iupac_para_regex("CCWGG"))          # "CC[AT]GG"
-print(procura_iupac("AAAA", "AA"))        #[14]
-
-print(prosite_para_regex("[AC]-x-V-x(4)-{ED}"))
-print(procura_prosite("GGCATGG", "C-A-T"))  #[14]
-
-cortes, frags = digestao_dna("GAATTCC", "G^AATTC")
-print("Cortes:", cortes)       #[15]
-print("Fragmentos:", frags)    # ["G", "AATTCC"]
-
-mat = pwm(["ACG", "ACG", "ATG"], tipo="DNA", pseudocontagem=1)
-pssm = pssm_de_pwm(mat, alfabeto="ACGT")
-
-best, pos, score = melhor_subsequencia(pssm, "TTTACGAAA")
-print(best, pos, score)
-
-print("Score k-mer:", score_kmer(pssm, "ACG"))
-
-### bioinf/blast.py
-
-from bioinf.blast import blast_simplificado
-
-query = "ATGCATGCA"
-banco = ["ATGCATGCA", "TTGCATGGA", "ATGCGTACA"]
-
-resultados = blast_simplificado(query, banco, k=3)
-
-for score, id_seq, q_aln, s_aln in resultados:
-    print(f"Seq {id_seq}: score={score}")
-    print(q_aln)
-    print(s_aln)
-
-### bioinf/filo.py
-
-from bioinf.filo import calcular_matriz_distancias, upgma
-
-seqs = ["ATGC", "ATGA", "TTGC"]
-matriz = calcular_matriz_distancias(seqs)
-print("Matriz:", matriz)
-
-arvore = upgma(matriz)
-print("Árvore (Newick):", arvore)
-
----
-
-## Testes Unitários
-
-Executar testes:
-pytest
-
-Executar testes com cobertura:
-pytest --cov=bioinf --cov-report=term-missing
-
-Relatório HTML:
-htmlcov/index.html
-
----
-
-## Documentação (Sphinx)
-
-Gerar documentação:
-cd docs
-make html
-
-Abrir:
-docs/build/html/index.html
-
----
-
-## Qualidade do Código (Radon)
-
-radon cc bioinf/ -a -s
-radon mi bioinf/ -s
-
----
-
-## Autores
-
-Grupo 07 —
-- Nome 1 (nº)
-- Nome 2 (nº)
-- Nome 3 (nº)
-
-UC: Algoritmos e Análise de Sistemas Biológicos
-Ano letivo: 2025/2026
+# Reverso-complemento
+print(dna_reverso("ATGC"))             # "GCAT"
 
