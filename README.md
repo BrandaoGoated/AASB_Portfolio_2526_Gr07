@@ -1,7 +1,9 @@
 # AASB_Portfolio_2526_Gr07
 
+# Portefólio de Algoritmos para Análise de Sequências Biológicas (AASB 2025/2026)
+
 Biblioteca Python que implementa os principais algoritmos abordados na UC.
-O projeto foi desenvolvido com foco em correção algorítmica, qualidade de código, documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo facilmente importável e reutilizável por terceiros.[3]
+O projeto foi desenvolvido com foco em correção algorítmica, qualidade de código, documentação completa (Sphinx) e testes unitários (cobertura ≥ 80%), sendo facilmente importável e reutilizável por terceiros.
 
 ---
 
@@ -10,41 +12,37 @@ O projeto foi desenvolvido com foco em correção algorítmica, qualidade de có
 .
 ├── requirements.txt
 ├── bioinf/
-│ ├── init.py
-│ ├── alignments.py
-│ ├── blast.py
-│ ├── filo.py
-│ ├── motifs.py
-│ └── sequencias.py
+│   ├── __init__.py
+│   ├── alignments.py
+│   ├── blast.py
+│   ├── filo.py
+│   ├── motifs.py
+│   └── sequencias.py
 ├── tests/
-│ ├── test_alignments_unittest.py
-│ ├── test_blast.py
-│ ├── test_filo.py
-│ ├── test_motifs.py
-│ └── test_sequencias.py
-├── docs/ # Sphinx (source + build/html)
+│   ├── test_alignments_unittest.py
+│   ├── test_blast.py
+│   ├── test_filo.py
+│   ├── test_motifs.py
+│   └── test_sequencias.py
+├── docs/          # Sphinx (source + build/html)
 ├── exemplos/
-├── radon/ # relatórios Radon (json)
-└── htmlcov/ # relatório coverage (HTML)
-
-text
+├── radon/         # relatórios Radon (json)
+└── htmlcov/       # relatório coverage (HTML)
 
 ---
 
 ## Instalação
 
-```bash
 pip install -r requirements.txt
 
-Uso dos códigos
+---
 
-    Nota: exemplos assumem execução a partir da raiz do projeto (package bioinf acessível).
+## Uso dos códigos
 
-    ​
+Nota: exemplos assumem execução a partir da raiz do projeto (package `bioinf` acessível).
 
-bioinf/sequencias.py
+### bioinf/sequencias.py
 
-python
 from bioinf.sequencias import dna, rna, proteina, dna_para_rna, dna_reverso
 
 print(dna("ACTG"))          # "DNA Válido"
@@ -55,10 +53,8 @@ print(proteina("ACDE"))     # "Proteína Válida" (exemplo)
 print(dna_para_rna("ACT"))  # "ACU"
 print(dna_reverso("ACT"))   # "AGT" (exemplo)
 
-​
-bioinf/alignments.py
+### bioinf/alignments.py
 
-python
 from bioinf.alignments import (
     Blosum62,
     needleman_wunsch,
@@ -81,10 +77,8 @@ print("Consenso:", consensus(aln))
 seqs = ["AC", "AG", "AT"]
 print("Progressivo:", progressive_alignment(seqs, bl))
 
-​
-bioinf/motifs.py
+### bioinf/motifs.py
 
-python
 from bioinf.motifs import (
     iupac_para_regex,
     procura_iupac,
@@ -98,13 +92,13 @@ from bioinf.motifs import (
 )
 
 print(iupac_para_regex("CCWGG"))          # "CC[AT]GG"
-print(procura_iupac("AAAA", "AA"))        # [0, 2]
+print(procura_iupac("AAAA", "AA"))        #[14]
 
 print(prosite_para_regex("[AC]-x-V-x(4)-{ED}"))
-print(procura_prosite("GGCATGG", "C-A-T"))  # [1]
+print(procura_prosite("GGCATGG", "C-A-T"))  #[14]
 
 cortes, frags = digestao_dna("GAATTCC", "G^AATTC")
-print("Cortes:", cortes)       # [2]
+print("Cortes:", cortes)       #[15]
 print("Fragmentos:", frags)    # ["G", "AATTCC"]
 
 mat = pwm(["ACG", "ACG", "ATG"], tipo="DNA", pseudocontagem=1)
@@ -115,10 +109,8 @@ print(best, pos, score)
 
 print("Score k-mer:", score_kmer(pssm, "ACG"))
 
-​
-bioinf/blast.py
+### bioinf/blast.py
 
-python
 from bioinf.blast import blast_simplificado
 
 query = "ATGCATGCA"
@@ -131,10 +123,8 @@ for score, id_seq, q_aln, s_aln in resultados:
     print(q_aln)
     print(s_aln)
 
-​
-bioinf/filo.py
+### bioinf/filo.py
 
-python
 from bioinf.filo import calcular_matriz_distancias, upgma
 
 seqs = ["ATGC", "ATGA", "TTGC"]
@@ -144,62 +134,46 @@ print("Matriz:", matriz)
 arvore = upgma(matriz)
 print("Árvore (Newick):", arvore)
 
-​
-Testes Unitários
+---
 
-Os testes encontram-se em tests/ e cobrem casos normais, casos limite e exceções.
-
-​
+## Testes Unitários
 
 Executar testes:
-
-bash
 pytest
 
 Executar testes com cobertura:
-
-bash
 pytest --cov=bioinf --cov-report=term-missing
 
-    O relatório HTML de cobertura é gerado em htmlcov/index.html.
+Relatório HTML:
+htmlcov/index.html
 
-    ​
+---
 
-Documentação (Sphinx)
-
-A documentação é gerada com Sphinx e está disponível em HTML.
-
-​
+## Documentação (Sphinx)
 
 Gerar documentação:
-
-bash
 cd docs
 make html
 
 Abrir:
+docs/build/html/index.html
 
-    docs/build/html/index.html
+---
 
-Qualidade do Código (Radon)
+## Qualidade do Código (Radon)
 
-O trabalho exige classificação Radon mínima B (critério eliminatório).
-
-​
-
-bash
 radon cc bioinf/ -a -s
 radon mi bioinf/ -s
 
-Autores
+---
+
+## Autores
 
 Grupo 07 —
-
-    Nome 1 (nº)
-
-    Nome 2 (nº)
-
-    Nome 3 (nº)
+- Nome 1 (nº)
+- Nome 2 (nº)
+- Nome 3 (nº)
 
 UC: Algoritmos e Análise de Sistemas Biológicos
 Ano letivo: 2025/2026
+
